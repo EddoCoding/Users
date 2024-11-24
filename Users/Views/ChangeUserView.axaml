@@ -1,0 +1,55 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:vm="using:Users.ViewModels"
+		x:DataType="vm:ChangeUserViewModel"
+        x:Class="Users.ChangeUserView"
+        Title="Изменение данных пользователя" Height="500" Width="400" Background="WhiteSmoke">
+
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+
+		<TextBlock Grid.Row="0" Grid.Column="0" Text="Фамилия" Foreground="Black" Margin="10,10,10,0" VerticalAlignment="Center"/>
+		<TextBox Grid.Row="0" Grid.Column="1" Text="{Binding UserVM.SurName}" Margin="0,10,10,0"/>
+
+		<TextBlock Grid.Row="1" Grid.Column="0" Text="Имя" Foreground="Black" Margin="10,10,10,0" VerticalAlignment="Center"/>
+		<TextBox Grid.Row="1" Grid.Column="1" Text="{Binding UserVM.Name}" Margin="0,10,10,0"/>
+
+		<TextBlock Grid.Row="2" Grid.Column="0" Text="Логин" Foreground="Black" Margin="10,10,10,0" VerticalAlignment="Center"/>
+		<TextBox Grid.Row="2" Grid.Column="1" Text="{Binding UserVM.Login}" Margin="0,10,10,0"/>
+
+		<TextBlock Grid.Row="3" Grid.Column="0" Text="Пароль" Foreground="Black" Margin="10,10,10,0" VerticalAlignment="Center"/>
+		<TextBox Grid.Row="3" Grid.Column="1" Text="{Binding UserVM.Password}" Margin="0,10,10,0"/>
+
+		<TextBlock Grid.Row="4" Grid.Column="0" Text="Почта" Foreground="Black" Margin="10,10,10,0" VerticalAlignment="Center"/>
+		<TextBox Grid.Row="4" Grid.Column="1" Text="{Binding UserVM.Mail}" Margin="0,10,10,0"/>
+
+		<TextBlock Grid.Row="5" Grid.Column="0" Text="Уровень" Foreground="Black" Margin="10,10,10,0" VerticalAlignment="Center"/>
+		<ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding AccessLevels}" SelectedItem="{Binding SelectedLevel}" Margin="0,10,10,0"/>
+
+		<TextBlock Grid.Row="6" Grid.Column="0" Text="Заметки" Foreground="Black" Margin="10,10,10,0" VerticalAlignment="Center"/>
+		<TextBox Grid.Row="6" Grid.Column="1" Text="{Binding UserVM.Notes}" Margin="0,10,10,0" AcceptsReturn="True"/>
+
+		<StackPanel Orientation="Horizontal" Grid.Row="7" Grid.ColumnSpan="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,10,10,10">
+			<Button Content="Изменить" Command="{Binding ChangeUserCommand}" CommandParameter="{Binding UserVM}" Background="DarkGray"/>
+			<Button Content="Закрыть" Command="{Binding CloseCommand}" Margin="10,0,0,0" Background="DarkGray"/>
+		</StackPanel>
+
+	</Grid>
+</Window>
+

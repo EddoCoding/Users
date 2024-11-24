@@ -3,13 +3,12 @@ using ReactiveUI.Fody.Helpers;
 using System.Collections.ObjectModel;
 using System.Reactive;
 using Users.Common;
-using Users.Models;
+using Users.Common.IoC;
 
 namespace Users.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public string[] AccessLevels { get; set; } = { "Guest", "User", "Moderator", "Administrator" };
         public ObservableCollection<UserVM> Users { get; set; } = new()
         {
             new UserVM() { SurName = "Васькин", Name = "Вася", Login = "1", Password = "2", Mail = "Почта.ру", AccessLevel = "Guest", Notes = "Заметки1" },
@@ -18,32 +17,16 @@ namespace Users.ViewModels
         };
         [Reactive] public UserVM UserVM { get; set; }
 
-        [Reactive] public bool Visibility { get; set; }
-        [Reactive] public bool VisibilityButtonAdd { get; set; }
-        [Reactive] public bool VisibilityButtonChange { get; set; }
-
-
-        [Reactive] public string SurName { get; set; } = string.Empty;
-        [Reactive] public string Name { get; set; } = string.Empty;
-        [Reactive] public string Login { get; set; } = string.Empty;
-        [Reactive] public string Password { get; set; } = string.Empty;
-        [Reactive] public string Mail { get; set; } = string.Empty;
-        [Reactive] public string AccessLevel { get; set; } = string.Empty;
-        [Reactive]  public string Notes { get; set; } = string.Empty;
-
-
-        public ReactiveCommand<Unit,Unit> UserCommand { get; set; }
+        public ReactiveCommand<Unit,Unit> AddUserCommand { get; set; }
         public ReactiveCommand<UserVM, Unit> DeleteUserCommand { get; set; }
         public ReactiveCommand<UserVM, Unit> ChangeCommand { get; set; }
 
-        public ReactiveCommand<Unit,Unit> CancelCommand { get; set; }
-        public ReactiveCommand<Unit,Unit> AddUserCommand { get; set; }
-        public ReactiveCommand<UserVM, Unit> ChangeUserCommand { get; set; }
-
+        IServiceView _serviceView;
         IUserRepository _userRepository;
-        public MainWindowViewModel(IUserRepository userRepository)
+        public MainWindowViewModel(IServiceView serviceView, IUserRepository userRepository)
         {
             _userRepository = userRepository;
+            _serviceView = serviceView;
 
             userRepository.CreateTableUser();
 
@@ -63,104 +46,19 @@ namespace Users.ViewModels
                 Users.Add(userVM);
             }
 
-            UserCommand = ReactiveCommand.Create(User);
-            DeleteUserCommand = ReactiveCommand.Create<UserVM>(DeleteUser);
-            ChangeCommand = ReactiveCommand.Create<UserVM>(Change);
-
-            CancelCommand = ReactiveCommand.Create(Cancel);
             AddUserCommand = ReactiveCommand.Create(AddUser);
-            ChangeUserCommand = ReactiveCommand.Create<UserVM>(ChangeUser);
+            DeleteUserCommand = ReactiveCommand.Create<UserVM>(DeleteUser);
+            ChangeCommand = ReactiveCommand.Create<UserVM>(ChangeUser);
         }
 
-        void User()
+        void AddUser() => _serviceView.Window<AddUserViewModel>(null, Users).NonModal();
+        async void DeleteUser(UserVM userVM)
         {
-            if (!Visibility)
-            {
-                Visibility = true;
-                VisibilityButtonAdd = true;
-                VisibilityButtonChange = false;
-            }
+            if (await _userRepository.DeleteUser(userVM.Id)) Users.Remove(userVM);
         }
-        async void DeleteUser(UserVM user)
+        void ChangeUser(UserVM userVM)
         {
-            if (await _userRepository.DeleteUser(user.Id))
-            {
-                Users.Remove(user);
-            }
-        }
-        void Change(UserVM user) 
-        {
-            if (user != null)
-            {
-                Visibility = true;
-                VisibilityButtonAdd = false;
-                VisibilityButtonChange = true;
-
-                SurName = UserVM.SurName;
-                Name = UserVM. Name;
-                Login = UserVM. Login;
-                Password = UserVM. Password;
-                Mail = UserVM. Mail;
-                AccessLevel = UserVM. AccessLevel;
-                Notes = UserVM. Notes;
-            }
-        }
-
-        async void AddUser()
-        {
-            var userVM = new UserVM
-            {
-                SurName = SurName,
-                Name = Name,
-                Login = Login,
-                Password = Password,
-                Mail = Mail,
-                AccessLevel = AccessLevel,
-                Notes = Notes
-            };
-            var user = new User
-            {
-                Id = userVM.Id,
-                SurName = userVM.SurName,
-                Name = userVM.Name,
-                Login = userVM.Login,
-                Password = userVM.Password,
-                Mail = userVM.Mail,
-                AccessLevel = userVM.AccessLevel,
-                Notes = userVM.Notes
-            };
-            if (await _userRepository.AddUser(user))
-            {
-                Users.Add(userVM);
-                Cancel();
-            }
-        }
-        async void ChangeUser(UserVM user)
-        {
-            user.SurName = SurName;
-            user.Name = Name;
-            user.Login = Login;
-            user.Password = Password;
-            user.Mail = Mail;
-            user.AccessLevel = AccessLevel;
-            user.Notes = Notes;
-
-            if (await _userRepository.ChangeUser(user)) Cancel();
-        }
-        void Cancel()
-        {
-            Visibility = false;
-            ClearProperties();
-        }
-        void ClearProperties()
-        {
-            SurName = string.Empty;
-            Name = string.Empty;
-            Login = string.Empty;
-            Password = string.Empty;
-            Mail = string.Empty;
-            AccessLevel = string.Empty;
-            Notes = string.Empty;
+            if(userVM != null) _serviceView.Window<ChangeUserViewModel>(null, userVM).NonModal();
         }
     }
 }
